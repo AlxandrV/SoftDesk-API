@@ -51,3 +51,10 @@ class Issues(models.Model):
     author_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author')
     assigned_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='assigned')
     created_time = models.DateTimeField(auto_now_add=True)
+
+class Comments(models.Model):
+
+    description = models.CharField(max_length=2048)
+    author_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    issue = models.ForeignKey(to=Issues, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
