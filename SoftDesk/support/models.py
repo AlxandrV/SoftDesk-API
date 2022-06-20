@@ -5,15 +5,15 @@ from django.utils.translation import gettext_lazy as _
 
 class Projects(models.Model):
 
-    class Type(models.IntegerChoices):
-        IOS = 1
-        ANDROID = 2
-        BACK_END = 3
-        FRONT_END = 4
+    class Type(models.TextChoices):
+        IOS = 'IOS'
+        ANDROID = 'ANDROID'
+        BACK_END = 'BACKEND'
+        FRONT_END = 'FRONTEND'
 
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=2048)
-    type = models.IntegerField(choices=Type.choices)
+    type = models.CharField(choices=Type.choices, max_length=8)
 
 class Contributors(models.Model):
 

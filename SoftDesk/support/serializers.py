@@ -1,12 +1,17 @@
+from dataclasses import field
 from wsgiref.validate import validator
 from pkg_resources import require
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from  django.contrib.auth.forms import UserCreationForm
-from rest_framework.validators import UniqueValidator
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.password_validation import validate_password
+from django.db.models import Q
+from rest_framework.validators import UniqueValidator
+
+from .models import Projects, Issues, Comments, Contributors
 
 class RegisterSerializer(serializers.ModelSerializer):
+
     email = serializers.EmailField(
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())]
@@ -22,7 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             'last_name': {'required': True}
         }
 
-    def validate(slef, attrs):
+    def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs
@@ -37,3 +42,26 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+class ProjectListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Projects
+        fields = '__all__'
+
+    def create(self, validated_data):
+        project = Projects.objects.create(**validated_data)
+        project.save()
+        contributor = Contributors.objects.create(
+            user=self.context['request'].user,
+            project=project,
+            role='AUTH'
+        )
+        contributor.save()
+        return project
+
+    def update(self, instance, validated_data):
+        author = Contributors.objects.filter(Q(project=instance) & Q(role='AUTH'))[0]
+        if author.user != self.context['request'].user:
+            raise serializers.ValidationError({"Permission": "You're not allowed to update this project."})
+        return super().update(instance, validated_data)
