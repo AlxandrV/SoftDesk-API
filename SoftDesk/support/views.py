@@ -21,6 +21,10 @@ class ProjectViewset(ModelViewSet):
     queryset = Projects.objects.all()
     permission_classes = [IsAuthenticated]
 
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
+
     def destroy(self, request, pk=None):
         project = Projects.objects.get(id=pk)
         author = Contributors.objects.filter(Q(project=project) & Q(role='AUTH'))[0]

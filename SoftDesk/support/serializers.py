@@ -1,5 +1,6 @@
 from dataclasses import field
 from wsgiref.validate import validator
+from django.forms import ChoiceField
 from pkg_resources import require
 from rest_framework import serializers
 from django.contrib.auth.models import User
@@ -44,10 +45,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class ProjectListSerializer(serializers.ModelSerializer):
+    
+    type = serializers.SerializerMethodField()
 
     class Meta:
         model = Projects
         fields = '__all__'
+
+    def get_type(self, obj):
+        return obj.get_type_display()
 
     def create(self, validated_data):
         project = Projects.objects.create(**validated_data)
