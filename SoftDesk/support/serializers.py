@@ -1,6 +1,7 @@
 from dataclasses import field
 from wsgiref.validate import validator
 from django.forms import ChoiceField
+from django.http import JsonResponse
 from pkg_resources import require
 from rest_framework import serializers
 from django.contrib.auth.models import User
@@ -46,14 +47,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class ProjectListSerializer(serializers.ModelSerializer):
     
-    type = serializers.SerializerMethodField()
+    type = serializers.CharField(source='get_type_display')
 
     class Meta:
         model = Projects
         fields = '__all__'
-
-    def get_type(self, obj):
-        return obj.get_type_display()
 
     def create(self, validated_data):
         project = Projects.objects.create(**validated_data)
@@ -71,3 +69,26 @@ class ProjectListSerializer(serializers.ModelSerializer):
         if author.user != self.context['request'].user:
             raise serializers.ValidationError({"Permission": "You're not allowed to update this project."})
         return super().update(instance, validated_data)
+
+class UserListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Projects
+        fields= '__all__'
+
+    type = serializers.SerializerMethodField()
+    contributors = serializers.SerializerMethodField('get_contributors')
+
+    def get_type(self, obj):
+        return obj.get_type_display()
+
+    def get_contributors(self, obj):
+        # project = Projects.objects.get(id=pk)
+        contributors = Contributors.objects.filter(project=obj)
+        print([{
+            'role': contributor.role,
+            'id': contributor.user.id, 
+            'user': contributor.user.username
+            } 
+            for contributor in contributors])
+        return ({'role': contributor.role, 'id': contributor.user.id, 'user': contributor.user.username} for contributor in contributors)

@@ -7,7 +7,7 @@ from rest_framework import generics
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import RegisterSerializer, ProjectListSerializer
+from .serializers import RegisterSerializer, ProjectListSerializer, UserListSerializer
 from .models import Projects, Issues, Comments, Contributors
 
 class RegisterView(generics.CreateAPIView):
@@ -20,11 +20,7 @@ class ProjectViewset(ModelViewSet):
     serializer_class = ProjectListSerializer
     queryset = Projects.objects.all()
     permission_classes = [IsAuthenticated]
-
-    def update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return super().update(request, *args, **kwargs)
-
+    
     def destroy(self, request, pk=None):
         project = Projects.objects.get(id=pk)
         author = Contributors.objects.filter(Q(project=project) & Q(role='AUTH'))[0]

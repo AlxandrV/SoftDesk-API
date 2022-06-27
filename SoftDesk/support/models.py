@@ -18,13 +18,14 @@ class Projects(models.Model):
 
 class Contributors(models.Model):
 
-    class Role(models.TextChoices):
-        AUTHOR = 'AUTH'
-        CONTRIBUTOR = 'CONT'
+    ROLE = (
+        ('AUTHOR', 'Auteur'),
+        ('CONTRIBUTOR', 'Contributeur')
+    )
 
     user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     project = models.ForeignKey(to=Projects, on_delete=models.CASCADE)
-    role = models.CharField(choices=Role.choices, max_length=4)
+    role = models.CharField(choices=ROLE, max_length=11)
 
 class Issues(models.Model):
 
