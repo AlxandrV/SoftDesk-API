@@ -59,7 +59,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
         contributor = Contributors.objects.create(
             user=self.context['request'].user,
             project=project,
-            role='AUTH'
+            role='AUTHOR'
         )
         contributor.save()
         return project
@@ -83,6 +83,7 @@ class ContributorListSerializer(serializers.ModelSerializer):
         contributor = Contributors.objects.filter(Q(project=validated_data['project']) & Q(user=validated_data['user']) & Q(role='CONTRIBUTOR'))
         if not contributor :
             contributor = Contributors.objects.create(**validated_data)
+            contributor.save()
             return contributor
         else:
             raise serializers.ValidationError({'user': 'This user is already contributing to this project'})
