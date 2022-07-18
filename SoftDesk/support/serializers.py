@@ -76,7 +76,6 @@ class ContributorListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Contributors
-        # fields = '__all__'
         exclude = ('project',)
 
     def create(self, validated_data):
@@ -87,3 +86,11 @@ class ContributorListSerializer(serializers.ModelSerializer):
             return contributor
         else:
             raise serializers.ValidationError({'user': 'This user is already contributing to this project'})
+
+
+class IssueListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Issues
+        exclude = ('project',)
+        extra_kwargs = {'author_user': {'read_only':True},'assigned_user': {'read_only':True}}

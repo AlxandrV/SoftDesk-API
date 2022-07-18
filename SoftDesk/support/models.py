@@ -29,11 +29,11 @@ class Contributors(models.Model):
 
 class Issues(models.Model):
 
-    class Tag(models.TextChoices):
-        BUG = 'BUG', _('Bug')
-        UPGRADE = 'UGD', _('Amélioration')
-        TASK = 'TASK', _('Tâche')
-
+    TAG = (
+        ('BUG', 'Bug'),
+        ('UGD', 'Amélioration'),
+        ('TASK', 'Tâche')
+    )
     class Priority(models.IntegerChoices):
         HIGH = 1, _('Élevée')
         MEAN = 2, _('Moyenne')
@@ -46,10 +46,10 @@ class Issues(models.Model):
 
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=2048)
-    tag = models.CharField(choices=Tag.choices, max_length=4)
+    tag = models.CharField(choices=TAG, max_length=4)
     priority = models.IntegerField(choices=Priority.choices)
     project = models.ForeignKey(to=Projects, on_delete=models.CASCADE)
-    status = models.CharField(choices=Status.choices, max_length=2)
+    status = models.CharField(choices=Status.choices, max_length=2, default=Status.TO_DO)
     author_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author')
     assigned_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='assigned')
     created_time = models.DateTimeField(auto_now_add=True)

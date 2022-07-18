@@ -1,15 +1,18 @@
 from json import JSONEncoder
 from pydoc import importfile
+from venv import create
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.db.models import Q
+
 from rest_framework import generics
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import serializers
+from rest_framework.renderers import JSONRenderer
 
-from .permissions import IsAuthenticatedProject, IsAuthenticatedContributor
-from .serializers import RegisterSerializer, ProjectListSerializer, ContributorListSerializer
+from .permissions import IsAuthenticatedProject, IsAuthenticatedContributor, IsAuthenticatedIssue
+from .serializers import RegisterSerializer, ProjectListSerializer, ContributorListSerializer, IssueListSerializer
 from .models import Projects, Issues, Comments, Contributors
 
 class RegisterView(generics.CreateAPIView):
@@ -52,3 +55,25 @@ class ContributorViewSet(ModelViewSet):
                 return JsonResponse({'delete': f'{contributor.user} contributor to be deleted'})
         else:
             raise serializers.ValidationError({'user': 'This user does not contribute to the project'})
+
+class IssueViewSet(ModelViewSet):
+
+    serializer_class = IssueListSerializer
+    queryset = Issues.objects.all()
+    permission_classes = [IsAuthenticatedIssue]
+
+    def get_queryset(self):
+        queryset = Issues.objects.filter(project=self.kwargs['project_pk'])
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        request.data._mutable = True
+        request.data['assigned_user'] = self.request.user
+        # serializer = self.get_serializer(data=request.data)
+        # self.perform_create(serializer)
+        return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=True)
+        serializer.save(author_user=self.request.user, assigned_user=self.request.user, project=Projects.objects.get(id=self.kwargs['project_pk']))
+        # return super().perform_create(serializer)
