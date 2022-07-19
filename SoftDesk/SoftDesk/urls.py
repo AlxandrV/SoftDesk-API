@@ -17,7 +17,7 @@ Including another URLconf
 from rest_framework_nested import routers
 from django.contrib import admin
 from django.urls import path, include
-from support.views import RegisterView, ProjectViewSet, ContributorViewSet, IssueViewSet
+from support.views import RegisterView, ProjectViewSet, ContributorViewSet, IssueViewSet, CommentViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
@@ -28,6 +28,9 @@ projects_router = routers.NestedSimpleRouter(router, 'projects', lookup='project
 projects_router.register('users', ContributorViewSet, basename='project-user')
 projects_router.register('issues', IssueViewSet, basename='issue')
 
+issues_router = routers.NestedSimpleRouter(projects_router, 'issues', lookup='issue')
+issues_router.register('comments', CommentViewSet, basename='comment')
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('', include('rest_framework.urls')),
@@ -36,4 +39,5 @@ urlpatterns = [
     path('refresh/', TokenRefreshView.as_view(), name='refresh'),
     path('', include(router.urls)),
     path('', include(projects_router.urls)),
+    path('', include(issues_router.urls)),
 ]

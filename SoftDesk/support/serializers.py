@@ -92,5 +92,12 @@ class IssueListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Issues
-        exclude = ('project',)
-        extra_kwargs = {'author_user': {'read_only':True},'assigned_user': {'read_only':True}}
+        fields = '__all__'
+        extra_kwargs = {'author_user': {'read_only': True},'assigned_user': {'read_only': True}}
+
+
+class CommentListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comments
+        fields = '__all__'

@@ -57,6 +57,6 @@ class Issues(models.Model):
 class Comments(models.Model):
 
     description = models.CharField(max_length=2048)
-    author_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author_comment')
     issue = models.ForeignKey(to=Issues, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)

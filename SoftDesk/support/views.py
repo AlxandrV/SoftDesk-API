@@ -11,8 +11,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import serializers
 from rest_framework.renderers import JSONRenderer
 
-from .permissions import IsAuthenticatedProject, IsAuthenticatedContributor, IsAuthenticatedIssue
-from .serializers import RegisterSerializer, ProjectListSerializer, ContributorListSerializer, IssueListSerializer
+from .permissions import IsAuthenticatedProject, IsAuthenticatedContributor, IsAuthenticatedIssue, IsAuthenticatedComment
+from .serializers import RegisterSerializer, ProjectListSerializer, ContributorListSerializer, IssueListSerializer, CommentListSerializer
 from .models import Projects, Issues, Comments, Contributors
 
 class RegisterView(generics.CreateAPIView):
@@ -70,5 +70,23 @@ class IssueViewSet(ModelViewSet):
         request.data._mutable = True
         if 'assigned_user' not in request.data:
             request.data['assigned_user'] = self.request.user
+        else:
+            request.data['assigned_user'] = User.objects.get(id=request.data['assigned_user'])
         request.data['project'] = Projects.objects.get(id=self.kwargs['project_pk'])
+        return super().create(request, *args, **kwargs)
+
+class CommentViewSet(ModelViewSet):
+
+    serializer_class = CommentListSerializer
+    queryset = Comments.objects.all()
+    permission_classes = [IsAuthenticatedComment]
+
+    def get_queryset(self):
+        queryset =  Comments.objects.filter(issue=self.kwargs['issue_pk'])
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        request.data._mutable = True
+        request.data['issue'] = Issues.objects.get(id=self.kwargs['issue_pk']).id
+        request.data['author_user'] = self.request.user.id
         return super().create(request, *args, **kwargs)
