@@ -68,12 +68,7 @@ class IssueViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         request.data._mutable = True
-        request.data['assigned_user'] = self.request.user
-        # serializer = self.get_serializer(data=request.data)
-        # self.perform_create(serializer)
+        if 'assigned_user' not in request.data:
+            request.data['assigned_user'] = self.request.user
+        request.data['project'] = Projects.objects.get(id=self.kwargs['project_pk'])
         return super().create(request, *args, **kwargs)
-
-    def perform_create(self, serializer):
-        serializer.is_valid(raise_exception=True)
-        serializer.save(author_user=self.request.user, assigned_user=self.request.user, project=Projects.objects.get(id=self.kwargs['project_pk']))
-        # return super().perform_create(serializer)

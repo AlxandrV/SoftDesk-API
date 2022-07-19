@@ -37,15 +37,18 @@ class IsAuthenticatedContributor(BasePermission):
 class IsAuthenticatedIssue(BasePermission):
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated)
+        contributors = Contributors.objects.filter(project=view.kwargs['project_pk']).values('user')
+        users = User.objects.filter(id__in=contributors)
+        return bool(request.user in users
+            and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
+        if request.method in SAFE_METHODS or request.method == 'POST':
             contributors = Contributors.objects.filter(project=view.kwargs['project_pk']).values('user')
             users = User.objects.filter(id__in=contributors)
             return bool(request.user in users
                 and request.user.is_authenticated)
         else:
-            author = Issues.objects.get(id=view.kwargs['issue_pk'])
+            author = Issues.objects.get(id=view.kwargs['pk'])
             return bool(request.user == author.author_user
                 and request.user.is_authenticated)
