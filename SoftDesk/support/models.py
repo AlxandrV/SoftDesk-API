@@ -31,7 +31,7 @@ class Issues(models.Model):
 
     TAG = (
         ('BUG', 'Bug'),
-        ('UGD', 'Amélioration'),
+        ('UPGRADE', 'Amélioration'),
         ('TASK', 'Tâche')
     )
     class Priority(models.IntegerChoices):
@@ -40,16 +40,16 @@ class Issues(models.Model):
         LOW = 3, _('Faible')
 
     class Status(models.TextChoices):
-        TO_DO = 'TD', _('À faire')
-        IN_PROGRESS = 'IP', _('En cours')
-        DONE = 'DN', _('Terminé')
+        TO_DO = 'TODO', _('À faire')
+        IN_PROGRESS = 'INPROGRESS', _('En cours')
+        DONE = 'DONE', _('Terminé')
 
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=2048)
-    tag = models.CharField(choices=TAG, max_length=4)
+    tag = models.CharField(choices=TAG, max_length=7)
     priority = models.IntegerField(choices=Priority.choices)
     project = models.ForeignKey(to=Projects, on_delete=models.CASCADE)
-    status = models.CharField(choices=Status.choices, max_length=2, default=Status.TO_DO)
+    status = models.CharField(choices=Status.choices, max_length=10, default=Status.TO_DO)
     author_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author')
     assigned_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='assigned')
     created_time = models.DateTimeField(auto_now_add=True)
